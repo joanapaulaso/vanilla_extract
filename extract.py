@@ -2,15 +2,17 @@ import streamlit as st
 import pandas as pd
 
 
-# Define the function to calculate vanilla extract values
-def vanilla_extract_calculator_df(
-    bean_count, folds, base_price_per_oz_usd, usd_to_brl_exchange_rate
-):
+# Function to calculate vanilla extract values
+def vanilla_extract_calculator_df(bean_count, folds, usd_to_brl_exchange_rate):
     # Constants
     bean_weight_per_bean_g = 3  # Each bean weighs 3 grams
     ounces_per_gallon = 128  # Fluid ounces per gallon
     grams_per_ounce = 28.3495  # Grams per ounce
     ml_per_gallon = 3785.41  # Milliliters per gallon
+
+    # Pricing per fold level
+    fold_prices = {1: 1.0, 2: 20.0, 3: 30.0}
+    base_price_per_oz_usd = fold_prices[folds]
 
     # Cost calculations
     bean_cost_per_kg_usd = 150  # Cost for 1000 grams of vanilla beans
@@ -39,7 +41,7 @@ def vanilla_extract_calculator_df(
     )  # 35% of the final volume should be alcohol
     water_volume_ml = final_volume_ml - alcohol_volume_ml  # Rest is water
 
-    # Calculate prices based on the user inputs
+    # Calculate prices in USD and BRL
     base_price_per_oz_brl = base_price_per_oz_usd * usd_to_brl_exchange_rate
     price_usd = final_volume_oz * base_price_per_oz_usd
     price_brl = final_volume_oz * base_price_per_oz_brl
@@ -93,10 +95,7 @@ st.image("logo.png", use_column_width=True, caption="", output_format="PNG")
 
 # Inputs
 bean_count = st.number_input("Number of Beans", min_value=0, value=333, step=1)
-folds = st.number_input("Number of Folds", min_value=1, value=1, step=1)
-base_price_per_oz_usd = st.number_input(
-    "Base Price of Extract per Ounce (USD)", min_value=0.0, value=1.0, step=0.1
-)
+folds = st.selectbox("Number of Folds", [1, 2, 3])
 usd_to_brl_exchange_rate = st.number_input(
     "USD to BRL Exchange Rate", min_value=1.0, value=5.0, step=0.1
 )
@@ -104,7 +103,7 @@ usd_to_brl_exchange_rate = st.number_input(
 # Calculate and display the results
 if st.button("Calculate"):
     results_df = vanilla_extract_calculator_df(
-        bean_count, folds, base_price_per_oz_usd, usd_to_brl_exchange_rate
+        bean_count, folds, usd_to_brl_exchange_rate
     )
     st.table(results_df)
 
