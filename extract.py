@@ -33,6 +33,7 @@ def vanilla_extract_calculator_df(
 
     # Calculate weight of beans
     total_bean_weight_g = bean_count * bean_weight_per_bean_g
+    total_bean_weight_kg = total_bean_weight_g / 1000  # Convert to kilograms
 
     # Determine weight of beans per gallon for 1-fold (from provided data)
     weight_per_gallon_1_fold_g = 378.47  # for 1-fold based on the table
@@ -69,12 +70,12 @@ def vanilla_extract_calculator_df(
     cultivation_space_m2 = (bean_count / beans_per_land_unit) * m2_per_bean_unit
     cultivation_space_ha = cultivation_space_m2 / m2_per_ha
 
-    # Estimate the cost of vanilla production based on cultivation space
+    # Estimate the cost of vanilla production based on total weight of beans
     total_producer_cost_min_usd = (
-        green_vanilla_price_eur_min * cultivation_space_ha * eur_to_usd
+        green_vanilla_price_eur_min * total_bean_weight_kg * eur_to_usd
     )
     total_producer_cost_max_usd = (
-        green_vanilla_price_eur_max * cultivation_space_ha * eur_to_usd
+        green_vanilla_price_eur_max * total_bean_weight_kg * eur_to_usd
     )
     total_producer_cost_mean_usd = (
         total_producer_cost_min_usd + total_producer_cost_max_usd
