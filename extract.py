@@ -92,7 +92,7 @@ st.title("Vanilla Extract Calculator")
 st.image("logo.png", use_column_width=True, caption="", output_format="PNG")
 
 # Inputs
-bean_count = st.number_input("Number of Beans", min_value=0, value=30, step=1)
+bean_count = st.number_input("Number of Beans", min_value=0, value=333, step=1)
 folds = st.number_input("Number of Folds", min_value=1, value=1, step=1)
 base_price_per_oz_usd = st.number_input(
     "Base Price of Extract per Ounce (USD)", min_value=0.0, value=1.0, step=0.1
