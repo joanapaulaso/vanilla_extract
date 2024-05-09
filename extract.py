@@ -4,7 +4,12 @@ import pandas as pd
 
 # Define the function to calculate vanilla extract values
 def vanilla_extract_calculator_df(
-    bean_count, folds, usd_to_brl_exchange_rate, eur_to_brl_exchange_rate, eur_to_usd
+    bean_count,
+    folds,
+    usd_to_brl_exchange_rate,
+    eur_to_brl_exchange_rate,
+    eur_to_usd,
+    expected_producer_gain=None,
 ):
     # Constants
     bean_weight_per_bean_g = 3  # Each bean weighs 3 grams
@@ -40,6 +45,16 @@ def vanilla_extract_calculator_df(
 
     # Calculate required weight per gallon for the desired fold level
     required_weight_per_gallon_g = weight_per_gallon_1_fold_g * folds
+
+    # Check if reverse calculation mode is active
+    if expected_producer_gain is not None:
+        # Calculate total ounces required to reach the expected producer gain
+        price_per_ounce_usd = base_price_per_oz_usd
+        total_oz_required = expected_producer_gain / price_per_ounce_usd
+        total_ml_required = (total_oz_required / ounces_per_gallon) * ml_per_gallon
+        total_gallons_required = total_ml_required / ml_per_gallon
+        total_bean_weight_g = total_gallons_required * required_weight_per_gallon_g
+        bean_count = total_bean_weight_g / bean_weight_per_bean_g
 
     # Calculate the number of gallons needed to use the given number of beans for the specified fold level
     gallons_needed = total_bean_weight_g / required_weight_per_gallon_g
@@ -83,13 +98,13 @@ def vanilla_extract_calculator_df(
 
     # Calculate the space needed for curing based on 800 kg per month
     curing_space_required_m2 = (
-        (total_bean_weight_g / 1000) / 800 * curing_space_m2_per_800kg
-    )
+        (total_bean_weight_g / 1000) / 800
+    ) * curing_space_m2_per_800kg
 
     # Calculate costs and gains
     alcohol_cost_usd = alcohol_volume_l * alcohol_price_per_l_usd
-    land_price_usd = (
-        land_price_per_ha_brl / usd_to_brl_exchange_rate * (cultivation_space_ha + (curing_space_required_m2 / 10000))
+    land_price_usd = (land_price_per_ha_brl / usd_to_brl_exchange_rate) * (
+        cultivation_space_ha + (curing_space_required_m2 / 10000)
     )
 
     # Separate costs and gains into a DataFrame
@@ -140,7 +155,7 @@ def vanilla_extract_calculator_df(
             "Curing Space (ha)",
         ],
         "Value": [
-            bean_count,
+            round(bean_count, 2),
             folds,
             round(total_bean_weight_g, 2),
             round(alcohol_volume_ml, 2),
@@ -167,10 +182,20 @@ def vanilla_extract_calculator_df(
 st.title("Vanilla Extract Calculator")
 
 # Display the logo image at the top
-st.image("logo.png", use_column_width=True, caption="Your Logo", output_format="PNG")
+st.image("logo.png", use_column_width=True, caption="", output_format="PNG")
 
-# Inputs
-bean_count = st.number_input("Number of Beans", min_value=0, value=333, step=1)
+# Reverse Calculation Mode
+reverse_calculation = st.checkbox("Reverse Calculation Mode")
+expected_producer_gain = None
+bean_count = 0
+
+if not reverse_calculation:
+    bean_count = st.number_input("Number of Beans", min_value=0, value=333, step=1)
+else:
+    expected_producer_gain = st.number_input(
+        "Expected Producer Gain (USD)", min_value=0.0, value=1000.0, step=50.0
+    )
+
 folds = st.selectbox("Number of Folds", [1, 2, 3])
 usd_to_brl_exchange_rate = st.number_input(
     "USD to BRL Exchange Rate", min_value=1.0, value=5.0, step=0.1
@@ -190,6 +215,7 @@ if st.button("Calculate"):
         usd_to_brl_exchange_rate,
         eur_to_brl_exchange_rate,
         eur_to_usd,
+        expected_producer_gain,
     )
     st.write("**Overview of Extract Production**")
     st.table(main_df)
