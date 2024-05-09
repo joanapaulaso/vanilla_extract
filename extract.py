@@ -36,10 +36,6 @@ def vanilla_extract_calculator_df(
     green_vanilla_price_eur_max = 16.6
     curing_space_m2_per_800kg = 1600
 
-    # Calculate weight of beans
-    total_bean_weight_g = bean_count * bean_weight_per_bean_g
-    total_bean_weight_kg = total_bean_weight_g / 1000  # Convert to kilograms
-
     # Determine weight of beans per gallon for 1-fold (from provided data)
     weight_per_gallon_1_fold_g = 378.47  # for 1-fold based on the table
 
@@ -55,6 +51,10 @@ def vanilla_extract_calculator_df(
         total_gallons_required = total_ml_required / ml_per_gallon
         total_bean_weight_g = total_gallons_required * required_weight_per_gallon_g
         bean_count = total_bean_weight_g / bean_weight_per_bean_g
+
+    # Calculate the weight of beans in kilograms
+    total_bean_weight_g = bean_count * bean_weight_per_bean_g
+    total_bean_weight_kg = total_bean_weight_g / 1000
 
     # Calculate the number of gallons needed to use the given number of beans for the specified fold level
     gallons_needed = total_bean_weight_g / required_weight_per_gallon_g
